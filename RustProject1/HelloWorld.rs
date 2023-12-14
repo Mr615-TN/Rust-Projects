@@ -20,9 +20,9 @@ fn main() {
     let slice2 = "안녕!";
     println!("Slice2 is {} bytes but only {} characters.", slice2.len(), slice2.chars().count());
 
-    let my_float: f32 = 5.0; // This is an f64
+    let my_float: f64 = 5.0; // This is an f64
     let my_other_float: f32 = 8.5; // This is an f32
 
-    let third_float = my_float + my_other_float; // ⚠️
-    println!("{}",third_float);
+    let third_float = my_float + my_other_float as f64; // ⚠️
+    //println!("{}",third_float);
 }
