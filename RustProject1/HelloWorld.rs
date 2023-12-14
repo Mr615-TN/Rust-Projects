@@ -13,6 +13,4 @@ fn main() {
     println!("Size of string containing 'ß': {}", "ß".len());
     println!("Size of string containing '国': {}", "国".len());
     println!("Size of string containing '𓅱': {}", "𓅱".len());
-    let my_number: u8 = 100; //  change my_number to my_number: u8
-    println!("{}", my_number as char);
 }
