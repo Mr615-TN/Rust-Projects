@@ -1,9 +1,9 @@
 HelloWorld:
-	rustc HelloWorld.rs 
+	rustc Booty.rs 
 
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f HelloWorld
+	rm -f Booty
 	
 .PHONY: all clean
