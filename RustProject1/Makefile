@@ -1,9 +1,9 @@
 HelloWorld:
-	rustc DisplayDebug.rs 
+	rustc Mutability.rs 
 
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f DisplayDebug
+	rm -f Mutability
 	
 .PHONY: all clean
