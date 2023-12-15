@@ -4,6 +4,6 @@ HelloWorld:
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f Cooty
+	rm -f RelloWorld
 	
 .PHONY: all clean
