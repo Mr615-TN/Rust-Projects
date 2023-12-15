@@ -1,5 +1,5 @@
 HelloWorld:
-	rustc Cooty.rs 
+	rustc RelloWorld.rs 
 
 clean:
 	rm -f *.o
