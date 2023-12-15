@@ -1,9 +1,9 @@
 HelloWorld:
-	rustc RelloWorld.rs 
+	rustc DisplayDebug.rs 
 
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f RelloWorld
+	rm -f DisplayDebug
 	
 .PHONY: all clean
