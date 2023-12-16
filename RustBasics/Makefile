@@ -1,9 +1,9 @@
 HelloWorld:
-	rustc Mutability.rs 
+	rustc Pointers.rs 
 
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f Mutability
+	rm -f Pointers
 	
 .PHONY: all clean
