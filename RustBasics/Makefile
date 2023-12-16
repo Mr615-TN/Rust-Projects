@@ -1,9 +1,9 @@
 HelloWorld:
-	rustc Pointers.rs 
+	rustc MorePrinting.rs 
 
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f Pointers
+	rm -f MorePrinting
 	
 .PHONY: all clean
