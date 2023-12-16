@@ -1,9 +1,7 @@
-HelloWorld:
-	rustc Mutability.rs 
+Main:
+	rustc main.rs 
 
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f Mutability
-	
-.PHONY: all clean
+	rm -f main
