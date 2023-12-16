@@ -24,5 +24,36 @@ for example the following code is no bueno because the keyword mut is not there:
 to fix it, you use the keyword mut and it makes the variable new_number not static/muttable:
     let mut new_number = 9;
     new_number = 10;
+
 Shadowing a variable is basically blocking a variable so that you can change the variable a bunch of times
+
+for example, one code to implement shadowing is:
+
+fn main() {
+    let variable = 9;
+    println!("Variable should print a number which is {}", variable);
+    {
+        let variable ="Hello There!";
+        println!("Variable should print a string and that is {}", variable)
+    }
+    println!("Variable should print the orignial number which is {}", variable);
+}
+
+another example of shadowing would be:
+
+fn squared(number: i32) -> i32 {
+    number * number
+}
+
+fn main() {
+    let new_variable = {
+        let y = 21;
+        let x = 22;
+        let x = squared(x);
+        let x = x + y;
+        x
+    };
+    println!("The number I got after inputting x as 22 and y as 21 is {}", new_variable)
+}
+
 */
