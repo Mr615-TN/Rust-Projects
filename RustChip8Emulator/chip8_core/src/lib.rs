@@ -1,3 +1,5 @@
+use rand::Rng;
+
 pub const SCREEN_WIDTH: usize = 64;
 pub const SCREEN_HEIGHT: usize = 32;
 
@@ -8,6 +10,8 @@ const NUM_KEYS: usize = 16;
 
 const START_ADDER = 0x200;
 const FONTSET_SIZE: usize = 80;
+
+
 const FONTSET: [u8; FONTSET_SIZE] = [
 0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -79,20 +83,17 @@ impl Emu {
         self.st = 0;
         self.ram[..FONTSET_SIZE].copy_from_slice(&FONTSET);
     }
-}
-
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    pub fn tick(&mut self) {
+        // Fetch
+        let op = self.fetch();
+        // Decode
+        // Execute
+        }
+        fn fetch(&mut self) -> u16 {
+        16
+        // TODO
     }
 }
+
+
+
