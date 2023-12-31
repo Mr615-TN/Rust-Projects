@@ -56,8 +56,8 @@ impl Emu {
             sp: 0,
             stack: [0; STACK_SIZE],
             keys: [false; NUM_KEYS],
-            dt: 0,
-            st: 0,
+            delay_timer: 0,
+            sound_timer: 0,
         };
         new_emu.ram[..FONTSET_SIZE].copy_from_slice(&FONTSET);
         new_emu
@@ -79,8 +79,8 @@ impl Emu {
         self.sp = 0;
         self.stack = [0; STACK_SIZE];
         self.keys = [false; NUM_KEYS];
-        self.dt = 0;
-        self.st = 0;
+        self.delay_timer = 0;
+        self.sound_timer = 0;
         self.ram[..FONTSET_SIZE].copy_from_slice(&FONTSET);
     }
     pub fn tick(&mut self) {
@@ -89,9 +89,15 @@ impl Emu {
         // Decode
         // Execute
         }
-        fn fetch(&mut self) -> u16 {
-        16
-        // TODO
+    fn fetch(&mut self) -> u16 {
+        let higher_bytes = self.ram[self.pc as usize] as u16;
+        let lower_bytes = self.ram[(self.pc+1) as usize] as u16;
+        let op = (higher_bytes << 8) | lower_bytes;
+        self.pc += 2;
+        op
+    }
+    pub fn tick_timer(&mut self) {
+        if self.delay_timer
     }
 }
 
