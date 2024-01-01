@@ -122,7 +122,7 @@ impl Emu {
 
             (0, 0, 0xE, 0xE) => { // Return from Subroutine 
                 let return_address = self.pop(); 
-                self.pc = ret_address;}, 
+                self.pc = return_address;}, 
 
             (1, _, _, _) => { // Jump
                 let nnn = op & 0xFFF; 
@@ -204,6 +204,143 @@ impl Emu {
                 self.v_registers[0xF] = new_f; 
             },
 
+            (8, _, _, 5) => { // VX -= VY
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+
+                let (new_x,borrow) = self.v_registers[x].overflowing_sub(self.v_registers[y]);
+                let new_f = if borrow { 0 } else { 1 };
+
+                self.v_registers[x] = new_x;
+                self.v_registers[0xF] = new_f; 
+            },
+
+            (8, _, _, 6) => { // Right Shift by 1
+                let x = digit_2 as usize;
+                let right_shift = self.v_registers[x] & 1;
+                self.v_registers[x] >>= 1;
+                self.v_registers[0xF] = right_shift
+            },
+
+            (8, _, _, 7) => { // VY - VX
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+
+                let (new_x,borrow) = self.v_registers[y].overflowing_sub(self.v_registers[x]);
+                let new_f = if borrow { 0 } else { 1 };
+
+                self.v_registers[x] = new_x;
+                self.v_registers[0xF] = new_f; 
+            },
+
+            (8, _, _, 0xE) => { // Left Shift by 1
+                let x = digit_2 as usize;
+                let left_shift = (self.v_registers[x] >> 7) & 1;
+                self.v_registers[x] << 1;
+                self.v_registers[x] = left_shift;
+            },
+
+            (9, _, _, 0) => { // VX != VY
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+                if self.v_registers[x] != self.v_registers[y] {
+                    self.pc += 2;
+                }
+            },
+
+            (0xA, _, _, _) => { // I = NNN
+                let nnn = op & 0xFFF;
+                self.i_registers = nnn;
+            },
+
+            (0xB, _, _, _) => { // JMP V0 + NNN
+                let nnn = op & 0xFFF;
+                self.i_registers = (self.v_registers[0] as u16) + nnn;
+            },
+            
+            (0xC, _, _, _) => { // VX = random number and NN
+                let x = digit_2 as usize;
+                let nn = (op & 0xFF) as u8;
+                let rng: u8 as random();
+                self.v_registers = rng & nn;
+            },
+
+            (0xD, _, _, _) => { // Drawing sprites
+                let x_coordinate = self.v_registers[digit_2 as usize] as u16;
+                let y_coordinate = self.v_registers[digit_3 as usize] as u16;
+
+                let number_rows = digit_4;
+                
+                let mut flip = false;
+
+                for y_line in 0..number_rows {
+
+                    let address = self.i_registers + y_line as u16;
+                    let pixel = self.ram[address as usize];
+
+                    for x_line in 0..8 {
+                        if (pixel & (0b1000_0000 >> x_line)) != 0 {
+
+                            let x = (x_coordinate + x_line) as usize % SCREEN_WIDTH;
+                            let y = (y_coordinate + y_line) as usize % SCREEN_HEIGHT;
+
+                            let index = x + SCREEN_WIDTH * y;
+
+                            flip |= self.screen[index];
+                            self.screen[index] ^= true;
+                        }
+                    }
+                }
+
+                if flip {
+                    self.v_registers[0xF] = 1;
+                }
+                else {
+                    self.v_registers[0xF] = 0;
+                }
+            },
+
+            (0xE, _, 9, 0xE) => { // Skip if Key Pressed
+                let x = digit_2 as usize;
+                let v_reg_x = self.v_registers[x];
+                let key_press = self.keys[v_reg_x as usize];
+                if key_press {
+                    self.pc += 2;
+                }
+            },
+
+            (0xE, _, 0xA, 1) => { // Skip if Key no Pressed
+                let x = digit_2 as usize;
+                let v_reg_x = self.v_registers[x];
+                let key_press = self.keys[v_reg_x as usize];
+                if !key_press {
+                    self.pc += 2;
+                } 
+            },
+
+            (0xF, _, 0, 7) => { // VX is Delay Timer
+                let x = digit_2 as usize;
+                self.v_registers[x] = self.delay_timer;
+            },
+
+            (0xF, _, 0, 0xA) => { // Wait if key press or no
+                let x = digit_2 as usize;
+                let mut press_key = false;
+
+                for i in 0..self.keys.len() {
+                    if self.keys[i] {
+                        self.v_registers[x] = i as u8;
+                        press_key = true;
+                        break;
+                    }
+                }
+                
+                if !press_key {
+                    self.pc -= 2;
+                }
+            },
+
+            
             (_,_,_,_) => unimplemented!("Unimplemented opcode: {}", op),
         }
     }
