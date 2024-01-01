@@ -51,8 +51,8 @@ impl Emu {
             ram: [0; RAM_SIZE],
             15
             screen: [false; SCREEN_WIDTH * SCREEN_HEIGHT],
-            v_reg: [0; NUM_REGS],
-            i_reg: 0,
+            v_registers: [0; NUM_REGS],
+            i_registers: 0,
             sp: 0,
             stack: [0; STACK_SIZE],
             keys: [false; NUM_KEYS],
@@ -74,8 +74,8 @@ impl Emu {
         self.pc = START_ADDR;
         self.ram = [0; RAM_SIZE];
         self.screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
-        self.v_reg = [0; NUM_REGS];
-        self.i_reg = 0;
+        self.v_registers = [0; NUM_REGS];
+        self.i_registers = 0;
         self.sp = 0;
         self.stack = [0; STACK_SIZE];
         self.keys = [false; NUM_KEYS];
@@ -88,6 +88,7 @@ impl Emu {
         let op = self.fetch();
         // Decode
         // Execute
+        self.execute(op);
         }
     fn fetch(&mut self) -> u16 {
         let higher_bytes = self.ram[self.pc as usize] as u16;
@@ -97,7 +98,114 @@ impl Emu {
         op
     }
     pub fn tick_timer(&mut self) {
-        if self.delay_timer
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+        if self.sound_timer > 0 {
+            if self.sound_timer == 1 {
+                // BEEP
+            }
+            self.sound_timer -= 1;
+        }
+    }
+    fn execute(&mut self, op: u16) {
+        let digit_1 = (op & 0xF000) >> 12;
+        let digit_2 = (op & 0x0F00) >> 8;
+        let digit_3 = (op & 0x00F0) >> 4;
+        let digit_4 = op & 0x000F;
+        
+        match(digit_1, digit_2, digit_3, digit_4) {
+            (0, 0, 0, 0) => return, // Do Nothing
+
+            (0, 0, 0xE, 0) => {// Clear Screen
+                self.screen = [false, SCREEN_WIDTH * SCREEN_HEIGHT];}, 
+
+            (0, 0, 0xE, 0xE) => { // Return from Subroutine 
+                let return_address = self.pop(); 
+                self.pc = ret_address;}, 
+
+            (1, _, _, _) => { // Jump
+                let nnn = op & 0xFFF; 
+                self.pc = nnn;}, 
+
+            (2, _, _, _) => { // Call Subroutine
+                let nnn = op & 0xFFF; 
+                self.push(self.pc); 
+                self.pc = nnn;},
+
+            (3, _, _, _) => { // Skip if VX == NN
+                let x = digit_2 as usize; 
+                let nn = (op & 0xFF) as u8;
+                if self.v_registers[x] == nn {
+                    self.pc += 2;
+                }
+            },
+
+            (4, _, _, _) => { // Skip if VX != NN
+                let x = digit_2 as usize;
+                let nn = (op & 0xFF) as u8;
+                if self.v_registers[x] != nn {
+                    self.pc += 2;
+                }
+            },
+
+            (5, _, _, 0) => { // Skip if VX == VY
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+                if self.v_registers[x] == self.v_registers[y] {
+                    self.pc += 2;
+                }
+            },
+
+            (6, _, _, _) => { // VX == NN
+                let x = digit_2 as usize;
+                let nn = (op & 0xFF) as u8;
+                v_registers[x] = nn;
+            },
+
+            (7, _, _, _) => { // VX += NN
+                let x = digit_2 as usize;
+                let nn = (op & 0xFF) as u8;
+                v_registers[x] = self.v_registers[x].wrapping_add(nn);
+            },
+
+            (8,_,_,0) => { // VX = VY
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+                self.v_registers[x] = self.v_registers[y];
+            },
+
+            (8, _, _, 1) => { // Bitwise Operations 8xy1
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+                self.v_registers[x] |= self.v_registers[y];
+            },
+
+            (8, _, _, 2) => { // Bitwise Operations 8xy2
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+                self.v_registers[x] |= self.v_registers[y];
+            },
+
+            (8, _, _, 3) => { // Bitwise Operations 8xy3
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+                self.v_registers[x] |= self.v_registers[y];
+            },
+
+            (8, _, _, 4) => { // VX += VY
+                let x = digit_2 as usize;
+                let y = digit_3 as usize;
+
+                let (new_x,carry) = self.v_registers[x].overflowing_add(self.v_registers[y]);
+                let new_f = if carry { 1 } else { 0 };
+
+                self.v_registers[x] = new_x;
+                self.v_registers[0xF] = new_f; 
+            },
+
+            (_,_,_,_) => unimplemented!("Unimplemented opcode: {}", op),
+        }
     }
 }
 
