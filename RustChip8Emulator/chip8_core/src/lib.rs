@@ -90,6 +90,7 @@ impl Emu {
         // Execute
         self.execute(op);
         }
+
     fn fetch(&mut self) -> u16 {
         let higher_bytes = self.ram[self.pc as usize] as u16;
         let lower_bytes = self.ram[(self.pc+1) as usize] as u16;
@@ -97,6 +98,7 @@ impl Emu {
         self.pc += 2;
         op
     }
+
     pub fn tick_timer(&mut self) {
         if self.delay_timer > 0 {
             self.delay_timer -= 1;
@@ -108,6 +110,20 @@ impl Emu {
             self.sound_timer -= 1;
         }
     }
+    pub fn get_display(&self) -> &[bool] {
+        &self.screen
+    }
+
+    pub fn keypress(&mut self, idx: usize, pressed: bool) {
+        self.keys[idx] = pressed;
+    }
+
+    pub fn load(&mut self, data: &[u8]) {
+        let start = START_ADDR as usize;
+        let end = (START_ADDR as usize) + data.len();
+        self.ram[start..end].copy_from_slice(data);
+    }
+
     fn execute(&mut self, op: u16) {
         let digit_1 = (op & 0xF000) >> 12;
         let digit_2 = (op & 0x0F00) >> 8;
@@ -340,7 +356,55 @@ impl Emu {
                 }
             },
 
-            
+            (0xF, _, 1, 5) => { // Delay Timer is VX
+                let x = digit_2 as usize;
+                self.delay_timer = self.v_registers[x];
+            },
+
+            (0xF, _, 1, 8) => { // Sound Timer is VX
+                let x = digit_2 as usize;
+                self.sound_timer = self.v_registers[x];
+            },
+
+            (0xF, _, 1, 0xE) => { // I += VX
+                let x = digit_2 as usize;
+                let v_reg_x = self.v_registers[x] as u16;
+                self.i_registers = self.i_registers.wrapping_add(v_reg_x);
+            },
+
+            (0xF, _, 2, 9) => { // I = Font
+                let x = digit_2 as usize;
+                let font_i = self.v_registers[x] as u16;
+                self.i_registers = font_i * 5;
+            },
+
+            (0xF, _, 3, 3) => { // Binary Convert Decimal
+                let x = digit_2 as usize;
+                let v_reg_x = self.v_registers[x] as f32;
+                let hundreds = (v_reg_x / 100.0).floor() as u8;
+                let tens = ((v_reg_x / 10.0) % 10.0).floor() as u8;
+                let ones = (v_reg_x % 10.0) as u8;
+                self.ram[self.i_registers as usize] = hundreds;
+                self.ram[(self.i_registers + 1) as usize] = tens;
+                self.ram[(self.i_registers + 2) as usize] = ones;
+            },
+
+            (0xF, _, 5, 5) => { // Storing V0 through VX including VX
+                let x = digit_2 as usize;
+                let i = self.i_registers as usize;
+                for index in 0..=x {
+                    self.ram[i+index] = self.v_registers[index];
+                }
+            },
+
+            (0xF, _, 6, 5)=> { // Loading I into V0 through VX
+                let x = digit_2 as usize;
+                let i = self.i_registers as usize;
+                for index in 0..=x {
+                    self.v_registers[index] = self.ram[i+index];
+                }
+            },
+
             (_,_,_,_) => unimplemented!("Unimplemented opcode: {}", op),
         }
     }
