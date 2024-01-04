@@ -49,7 +49,6 @@ impl Emu {
         let mut new_emu = Self {
             pc: START_ADDR,
             ram: [0; RAM_SIZE],
-            15
             screen: [false; SCREEN_WIDTH * SCREEN_HEIGHT],
             v_registers: [0; NUM_REGS],
             i_registers: 0,
@@ -277,8 +276,8 @@ impl Emu {
             (0xC, _, _, _) => { // VX = random number and NN
                 let x = digit_2 as usize;
                 let nn = (op & 0xFF) as u8;
-                let rng: u8 as random();
-                self.v_registers = rng & nn;
+                let rng: u8 = rand::thread_rng().gen();
+                self.v_registers[x] = rng & nn;
             },
 
             (0xD, _, _, _) => { // Drawing sprites

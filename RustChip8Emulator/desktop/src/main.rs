@@ -17,7 +17,7 @@ const WINDOW_HEIGHT: u32 = (SCREEN_HEIGHT as u32) * SCALE;
 fn main() {
     let argumento: Vec<_> = env::argumento().collect();
     if argumento.len() != 2 {
-        println!("Usage: cargo run path/to/game");
+        println!("Usage: cargo run /home/tanish/Rust-Projects/RustChip8Emulator/Chip8Games/15Puzzle");
         return;
     }
     // Creating SDL Window
