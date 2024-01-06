@@ -8,7 +8,7 @@ const NUM_REGISTERS: usize = 16;
 const STACK_SIZE: usize = 16;
 const NUM_KEYS: usize = 16;
 
-const START_ADDER = 0x200;
+const START_ADDER: u16 = 0x200;
 const FONTSET_SIZE: usize = 80;
 
 
@@ -35,11 +35,11 @@ pub struct Emu {
     pc: u16,
     ram: [u8; RAM_SIZE],
     screen_size: [bool; SCREEN_WIDTH * SCREEN_HEIGHT],
-    v_registers: [u8, NUM_REGISTERS],
+    v_registers: [u8; NUM_REGISTERS],
     i_registers: u16,
     sp: u16,
-    stack: [u16, STACK_SIZE],
-    keys: [bool, NUM_KEYS]
+    stack: [u16; STACK_SIZE],
+    keys: [bool; NUM_KEYS],
     delay_timer: u8,
     sound_timer: u8,
 }
@@ -47,10 +47,10 @@ pub struct Emu {
 impl Emu {
     pub fn new() -> Self {
         let mut new_emu = Self {
-            pc: START_ADDR,
+            pc: START_ADDER,
             ram: [0; RAM_SIZE],
-            screen: [false; SCREEN_WIDTH * SCREEN_HEIGHT],
-            v_registers: [0; NUM_REGS],
+            screen_size: [false; SCREEN_WIDTH * SCREEN_HEIGHT],
+            v_registers: [0; NUM_REGISTERS],
             i_registers: 0,
             sp: 0,
             stack: [0; STACK_SIZE],
@@ -70,10 +70,10 @@ impl Emu {
         self.stack[self.sp as usize]
     }
     pub fn reset(&mut self) {
-        self.pc = START_ADDR;
+        self.pc = START_ADDER;
         self.ram = [0; RAM_SIZE];
-        self.screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
-        self.v_registers = [0; NUM_REGS];
+        self.screen_size = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
+        self.v_registers = [0; NUM_REGISTERS];
         self.i_registers = 0;
         self.sp = 0;
         self.stack = [0; STACK_SIZE];
@@ -110,7 +110,7 @@ impl Emu {
         }
     }
     pub fn get_display(&self) -> &[bool] {
-        &self.screen
+        &self.screen_size
     }
 
     pub fn keypress(&mut self, idx: usize, pressed: bool) {
@@ -118,8 +118,8 @@ impl Emu {
     }
 
     pub fn load(&mut self, data: &[u8]) {
-        let start = START_ADDR as usize;
-        let end = (START_ADDR as usize) + data.len();
+        let start = START_ADDER as usize;
+        let end = (START_ADDER as usize) + data.len();
         self.ram[start..end].copy_from_slice(data);
     }
 
@@ -133,20 +133,24 @@ impl Emu {
             (0, 0, 0, 0) => return, // Do Nothing
 
             (0, 0, 0xE, 0) => {// Clear Screen
-                self.screen = [false, SCREEN_WIDTH * SCREEN_HEIGHT];}, 
+                self.screen_size = [false, SCREEN_WIDTH * SCREEN_HEIGHT];
+            }, 
 
             (0, 0, 0xE, 0xE) => { // Return from Subroutine 
                 let return_address = self.pop(); 
-                self.pc = return_address;}, 
+                self.pc = return_address;
+            }, 
 
             (1, _, _, _) => { // Jump
                 let nnn = op & 0xFFF; 
-                self.pc = nnn;}, 
+                self.pc = nnn;
+            }, 
 
             (2, _, _, _) => { // Call Subroutine
                 let nnn = op & 0xFFF; 
                 self.push(self.pc); 
-                self.pc = nnn;},
+                self.pc = nnn;
+            },
 
             (3, _, _, _) => { // Skip if VX == NN
                 let x = digit_2 as usize; 
@@ -175,13 +179,13 @@ impl Emu {
             (6, _, _, _) => { // VX == NN
                 let x = digit_2 as usize;
                 let nn = (op & 0xFF) as u8;
-                v_registers[x] = nn;
+                self.v_registers[x] = nn;
             },
 
             (7, _, _, _) => { // VX += NN
                 let x = digit_2 as usize;
                 let nn = (op & 0xFF) as u8;
-                v_registers[x] = self.v_registers[x].wrapping_add(nn);
+                self.v_registers[x] = self.v_registers[x].wrapping_add(nn);
             },
 
             (8,_,_,0) => { // VX = VY
@@ -301,8 +305,8 @@ impl Emu {
 
                             let index = x + SCREEN_WIDTH * y;
 
-                            flip |= self.screen[index];
-                            self.screen[index] ^= true;
+                            flip |= self.screen_size[index];
+                            self.screen_size[index] ^= true;
                         }
                     }
                 }
