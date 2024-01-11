@@ -133,7 +133,7 @@ impl Emu {
             (0, 0, 0, 0) => return, // Do Nothing
 
             (0, 0, 0xE, 0) => {// Clear Screen
-                self.screen_size = [false, SCREEN_WIDTH * SCREEN_HEIGHT];
+                self.screen_size = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
             }, 
 
             (0, 0, 0xE, 0xE) => { // Return from Subroutine 
@@ -255,7 +255,7 @@ impl Emu {
             (8, _, _, 0xE) => { // Left Shift by 1
                 let x = digit_2 as usize;
                 let left_shift = (self.v_registers[x] >> 7) & 1;
-                self.v_registers[x] << 1;
+                self.v_registers[x] <<= 1;
                 self.v_registers[x] = left_shift;
             },
 
