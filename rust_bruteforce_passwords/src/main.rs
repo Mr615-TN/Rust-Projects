@@ -6,13 +6,13 @@ fn generatepasswords(length: usize, charset: &[char]) -> HashSet<String> {
     passwords
 }
 
-fn passwords_recursive(passwords: &mut HashSet<String> length: usize, charset: &[char], current_password: String,){
+fn passwords_recursive(passwords: &mut HashSet<String>, length: usize, charset: &[char], current_password: String,){
     if current_password.len() == length {
-        passwords.insert(current_password)
+        passwords.insert(current_password);
         return;
     }
     for &c in charset {
-        let mut next_possible_password = current_password.close();
+        let mut next_possible_password = current_password.clone();
         next_possible_password.push(c);
         passwords_recursive(passwords, length, charset, next_possible_password)
     }
