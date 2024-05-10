@@ -19,7 +19,7 @@ fn passwords_recursive(passwords: &mut HashSet<String>, length: usize, charset: 
 }
 
 fn main() {
-    let charset = ['0','1','2','3','4', '5','6','7','8','9'];
+    let charset = ['0','1','2','3','4', '5'];
     let password_length = 10;
 
     let passwords = generatepasswords(password_length, &charset);
