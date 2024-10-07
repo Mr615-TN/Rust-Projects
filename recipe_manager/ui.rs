@@ -30,3 +30,12 @@ pub enum Message {
     SaveRecipes,
     LoadRecipes,
 }
+
+impl Sandbox for recipeManagerGUI { 
+    type Message = Message;
+    fn new() -> Self {
+        Self {
+            
+        }
+    }
+}
