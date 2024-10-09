@@ -172,4 +172,32 @@ impl Sandbox for recipeManagerGUI {
         let recipes: Element<_> = self
         .recipe_Manager
         .get_AllRecipes()
+        .iter()
+        .fold(Column::new().spacing(10), |column, recipe| {
+            column.push(
+                Row::new()
+                .push(
+                    Button::new(Tex::new(&recipe.name))
+                    .on_press(Message::RecipesSelected(recipe.clone()))
+                )
+                .push(
+                    Button::new(Text::new("Edit"))
+                    .on_press(Message::EditRecipe(recipe.id))
+                )
+                .push(
+                    Button::new(Tex::new("Delete"))
+                    .on_press(Message::DeleteRecipe(recipe.id))
+                )
+            )
+        })
+        .into();
+        let recipes_list = Scrollable::new(recipes)
+        .height(Length::Fill);
+
+        let recipe_detail = self.selected_recipe.as_ref().map_or(
+            Column::new().push(Text::new("No recipe selected")),
+            |recipe| {
+                
+            }
+        )
     }
