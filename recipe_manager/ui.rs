@@ -170,4 +170,6 @@ impl Sandbox for recipeManagerGUI {
             }
         );
         let recipes: Element<_> = self
+        .recipe_Manager
+        .get_AllRecipes()
     }
