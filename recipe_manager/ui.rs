@@ -197,7 +197,39 @@ impl Sandbox for recipeManagerGUI {
         let recipe_detail = self.selected_recipe.as_ref().map_or(
             Column::new().push(Text::new("No recipe selected")),
             |recipe| {
-                
-            }
-        )
+                Column::new()
+                    .push(Text::new(&recipe.name).size(24))
+                    .push(Text::new(format!("Servings: {}", recipe.servings)))
+                    .push(Text::new("Ingredients:"))
+                    .push(Text::new(recipe.ingredients.join(", ")))
+                    .push(Text::new("Instructions:"))
+                    .push(Text::new(recipe.instructions.join("\n")))
+            },
+        );
+
+        let control_buttons = Row::new()
+            .push(Button::new(Text::new("Save Recipes!")).on_press(Message::SaveRecipes))
+            .push(Button::new(Text::new("Load Recipes!")).on_press(Message::LoadRecipes));
+        
+        let error_display = if let Some(error) = &self.error_message {
+            Text::new(error).style(theme::Text::Color(Color::from_rgb(1.0, 0.0, 0.0)))
+        } else {
+            Text::new("")
+        };
+        let content = Column::new()
+            .push(recipe form)
+            .push(recipes_list)
+            .push(recipe_detail)
+            .push(control_buttons)
+            .push(error_display);
+        Container::new(content)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .center_x()
+            .center_y()
+            .into()
     }
+}
+pub fn run -> iced::Result {
+    RecipeManagerGUI::run(Settings::default())
+}
