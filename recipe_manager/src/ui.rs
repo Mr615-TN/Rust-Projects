@@ -5,8 +5,8 @@ use iced::Color;
 use crate::manager::RecipeManager;
 use crate::recipe::Recipe;
 
-pub fn recipeManagerGUI() {
-    recipe_Manager: RecipeManager,
+pub struct recipeManagerGUI() {
+    recipe_manager: RecipeManager,
     recipe_name: String,
     recipe_ingredients: String,
     recipe_instructions: String,
@@ -36,7 +36,7 @@ impl Sandbox for recipeManagerGUI {
     type Message = Message;
     fn new() -> Self {
         Self {
-            recipe_Manager: RecipeManager::new(),
+            recipe_manager: RecipeManager::new(),
             recipe_name: String::new(),
             recipe_ingredients: String::new(),
             recipe_instructions: String::new(),
@@ -54,7 +54,7 @@ impl Sandbox for recipeManagerGUI {
             Message::AddRecipe => {
                 if !self.recipe_name.is_empty() {
                     let servings = self.recipe_servings.parse().unwrap_or(1);
-                    self.recipe_Manager.add_Recipe(
+                    self.recipe_manager.add_Recipe(
                         self.recipe_name.clone(),
                         self.recipe_ingredients.split(',').map(String::from).collect(),
                         self.recipe_instructions.split('\n').map(String::from).collect(),
@@ -67,7 +67,7 @@ impl Sandbox for recipeManagerGUI {
                 }
             }
             Message::EditRecipe(id) => {
-                if let Some(recipe) = self.recipe_Manager.get_Recipe(id) {
+                if let Some(recipe) = self.recipe_manager.get_Recipe(id) {
                     self.recipe_name = recipe.name.clone();
                     self.recipe_ingredients = recipe.ingredients.join(", ");
                     self.recipe_instructions = recipe.instructions.join("\n");
@@ -79,7 +79,7 @@ impl Sandbox for recipeManagerGUI {
             Message::UpdateRecipe => {
                 if let Some(recipe) = &.selected_recipe {
                     let servings = self.recipe_servings.parse().unwrap_or(recipe.servings);
-                    self.recipe_Manager.update_Recipe(
+                    self.recipe_manager.update_Recipe(
                         recipe.id,
                         self.recipe_name.clone(),
                         self.recipe_ingredients.split(',').map(String::from).collect(),
@@ -114,17 +114,17 @@ impl Sandbox for recipeManagerGUI {
                 self.editing =false;
             }
             Message::DeleteRecipe(id) => {
-                if self.recipe_Manager.delete_Recipe(id) {
+                if self.recipe_manager.delete_Recipe(id) {
                     self.selected_recipe = None;
                 }
             }
             Message::SaveRecipes => {
-                if let Err(e) = self.recipe_Manager.save_ToFile("recipes.json") {
+                if let Err(e) = self.recipe_manager.save_ToFile("recipes.json") {
                     self.error_message = Some(format!("Failed to save recipes: {}", e))
                 }
             }
             Message::LoadRecipes => {
-                match self.recipe_Manager.load_FromFile("recipes.json") {
+                match self.recipe_manager.load_FromFile("recipes.json") {
                     Ok(_) => self.selected_recipe = None,
                     Err(e) => self.error_message = Some(format!("Failed to load recipes: {}", e))
                 }
@@ -170,7 +170,7 @@ impl Sandbox for recipeManagerGUI {
             }
         );
         let recipes: Element<_> = self
-        .recipe_Manager
+        .recipe_manager
         .get_AllRecipes()
         .iter()
         .fold(Column::new().spacing(10), |column, recipe| {
