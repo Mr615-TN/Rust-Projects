@@ -2,7 +2,7 @@ use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{Element, Length, Sandbox, Settings};
 use iced::theme;
 use iced::Color;
-use crate::recipe_manager::RecipeManager;
+use crate::manager::RecipeManager;
 use crate::recipe::Recipe;
 
 pub fn recipeManagerGUI() {
@@ -32,7 +32,7 @@ pub enum Message {
     LoadRecipes,
 }
 
-impl Sandbox for recipeManagerGUI { 
+impl Sandbox for recipeManagerGUI {
     type Message = Message;
     fn new() -> Self {
         Self {
@@ -116,7 +116,7 @@ impl Sandbox for recipeManagerGUI {
             Message::DeleteRecipe(id) => {
                 if self.recipe_Manager.delete_Recipe(id) {
                     self.selected_recipe = None;
-                } 
+                }
             }
             Message::SaveRecipes => {
                 if let Err(e) = self.recipe_Manager.save_ToFile("recipes.json") {
@@ -210,7 +210,7 @@ impl Sandbox for recipeManagerGUI {
         let control_buttons = Row::new()
             .push(Button::new(Text::new("Save Recipes!")).on_press(Message::SaveRecipes))
             .push(Button::new(Text::new("Load Recipes!")).on_press(Message::LoadRecipes));
-        
+
         let error_display = if let Some(error) = &self.error_message {
             Text::new(error).style(theme::Text::Color(Color::from_rgb(1.0, 0.0, 0.0)))
         } else {

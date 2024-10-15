@@ -1,5 +1,5 @@
 mod recipe;
-mod recipe_manager;
+mod manager;
 mod ui;
 
 fn main() {
